@@ -53,19 +53,19 @@ class ItemList(MethodView):
     def get(self):
         return ItemModel.query.all()
 
-@jwt_required(fresh=True)
-@blp.arguments(ItemSchema)
-@blp.response(201, ItemSchema)
-def post(self, item_data):
-    item = ItemModel(**item_data)
+    @jwt_required(fresh=True)
+    @blp.arguments(ItemSchema)
+    @blp.response(201, ItemSchema)
+    def post(self, item_data):
+            item = ItemModel(**item_data)
 
-    try:
-        db.session.add(item)
-        db.session.commit()
-    except SQLAlchemyError:
-        abort(500, message="An error occurred while inserting the item.")
+            try:
+                db.session.add(item)
+                db.session.commit()
+            except SQLAlchemyError:
+                abort(500, message="An error occurred while inserting the item.")
 
-    return item
+            return item
 
     @jwt_required()
     @blp.arguments(ItemSchema)

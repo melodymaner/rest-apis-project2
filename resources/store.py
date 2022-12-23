@@ -33,22 +33,22 @@ class StoreList(MethodView):
     def get(self):
         return StoreModel.query.all()
 
-@blp.arguments(StoreSchema)
-@blp.response(201, StoreSchema)
-def post(self, store_data):
-    store = StoreModel(**store_data)
-    try:
-        db.session.add(store)
-        db.session.commit()
-    except IntegrityError:
-        abort(
-            400,
-            message="A store with that name already exists.",
-        )
-    except SQLAlchemyError:
-        abort(500, message="An error occurred creating the store.")
+    @blp.arguments(StoreSchema)
+    @blp.response(201, StoreSchema)
+    def post(self, store_data):
+        store = StoreModel(**store_data)
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except IntegrityError:
+            abort(
+                400,
+                message="A store with that name already exists.",
+            )
+        except SQLAlchemyError:
+            abort(500, message="An error occurred creating the store.")
 
-    return store
+        return store
 
 
     

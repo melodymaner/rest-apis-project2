@@ -7,27 +7,35 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from db import db
 from blocklist import BLOCKLIST
 from models import UserModel
-from schemas import UserSchema
-
+from schemas import UserSchema, UserRegisterSchema
+from sqlalchemy import or_
 
 blp = Blueprint("Users", "users", description="Operations on users")
 
 
 @blp.route("/register")
 class UserRegister(MethodView):
-    @blp.arguments(UserSchema)
+    @blp.arguments(UserRegisterSchema)
     def post(self, user_data):
-        if UserModel.query.filter(UserModel.username == user_data["username"]).first():
-            abort(409, message="A user with that username already exists.")
+        if UserModel.query.filter(
+            or_(
+                UserModel.username == user_data["username"],
+                UserModel.email == user_data["email"],
+            )
+        ).first():
+            abort(409, message="A user with that username or email already exists.")
 
-        user = UserModel(
+        user = UserModel(            
             username=user_data["username"],
-            password=pbkdf2_sha256.hash(user_data["password"]),
+            email=user_data["email"],
+            password=pbkdf2_sha256.hash(user_data["password"]),                          
         )
         db.session.add(user)
         db.session.commit()
 
-        return {"message": "User created successfully."}, 201
+           
+
+        return user_data
 
 
 @blp.route("/login")
